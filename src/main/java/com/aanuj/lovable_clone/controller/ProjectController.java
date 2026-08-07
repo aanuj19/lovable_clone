@@ -30,7 +30,7 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getUserProjectById(id, userId));
     }
     @PostMapping
-    public ResponseEntity<ProjectResponse> createProject(ProjectRequest projectRequest){
+    public ResponseEntity<ProjectResponse> createProject(@RequestBody ProjectRequest projectRequest){
         Long userId = 1L;
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(userId, projectRequest));
     }
