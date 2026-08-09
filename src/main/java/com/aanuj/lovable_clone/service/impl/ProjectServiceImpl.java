@@ -13,8 +13,10 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -35,7 +37,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse getUserProjectById(Long id, Long userId) {
-        return null;
+        Project project = getAccessibleProjectById(id, userId);
+        return projectMapper.toProjectResponse(project);
     }
 
     @Override
@@ -51,11 +54,26 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse updateProject(Long id, ProjectRequest projectRequest, Long userId) {
-        return null;
+        Project project = getAccessibleProjectById(id, userId);
+        if(!project.getOwner().getId().equals(userId)){
+            throw new RuntimeException("You cannot update this project");
+        }
+        project.setName(projectRequest.name());
+        projectRepository.save(project);
+        return projectMapper.toProjectResponse(project);
     }
 
     @Override
     public void softDelete(Long id, Long userId) {
+        Project project = getAccessibleProjectById(id, userId);
+        if(!project.getOwner().getId().equals(userId)){
+            throw new RuntimeException("You cannot delete this project");
+        }
+        project.setDeletedAt(Instant.now());
+        projectRepository.save(project);
+    }
 
+    public Project getAccessibleProjectById(Long projectId, Long userId) {
+        return projectRepository.findAllAccessibleProjectById(projectId,userId).orElseThrow();
     }
 }
