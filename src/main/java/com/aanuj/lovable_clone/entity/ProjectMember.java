@@ -31,6 +31,6 @@ public class ProjectMember {
     @Column(nullable = false)
     ProjectRole projectRole;
 
-    Instant invitedBy;
+    Instant acceptedAt;
     Instant invitedAt;
 }
