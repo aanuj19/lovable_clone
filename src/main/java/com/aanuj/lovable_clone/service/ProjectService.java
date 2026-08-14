@@ -7,13 +7,12 @@ import com.aanuj.lovable_clone.dto.project.ProjectSummaryResponse;
 import java.util.List;
 
 public interface ProjectService {
-    List<ProjectSummaryResponse> getUserProject(Long userId);
+    List<ProjectSummaryResponse> getUserProject();
+    ProjectResponse getUserProjectById(Long id);
 
-    ProjectResponse getUserProjectById(Long id, Long userId);
+    ProjectResponse createProject(ProjectRequest projectRequest);
 
-    ProjectResponse createProject(Long userId, ProjectRequest projectRequest);
+    ProjectResponse updateProject(Long id, ProjectRequest projectRequest);
 
-    ProjectResponse updateProject(Long id, ProjectRequest projectRequest, Long userId);
-
-    void softDelete(Long id, Long userId);
+    void softDelete(Long id);
 }

@@ -13,6 +13,7 @@ import com.aanuj.lovable_clone.mapper.ProjectMapper;
 import com.aanuj.lovable_clone.repository.ProjectMemberRepository;
 import com.aanuj.lovable_clone.repository.ProjectRepository;
 import com.aanuj.lovable_clone.repository.UserRepository;
+import com.aanuj.lovable_clone.security.AuthUtil;
 import com.aanuj.lovable_clone.service.ProjectService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -34,24 +35,28 @@ public class ProjectServiceImpl implements ProjectService {
     UserRepository userRepository;
     ProjectMapper projectMapper;
     ProjectMemberRepository projectMemberRepository;
+    AuthUtil authUtil;
 
     @Override
-    public List<ProjectSummaryResponse> getUserProject(Long userId) {
+    public List<ProjectSummaryResponse> getUserProject() {
+        Long userId = authUtil.getCurrentUserId();
         List<Project> projects =  projectRepository.findAllAccessibleByUser(userId);
         return projectMapper.toListProjectSummaryResponse(projects);
     }
 
     @Override
-    public ProjectResponse getUserProjectById(Long id, Long userId) {
-        Project project = getAccessibleProjectById(id, userId);
+    public ProjectResponse getUserProjectById(Long id) {
+        Project project = getAccessibleProjectById(id);
         return projectMapper.toProjectResponse(project);
     }
 
     @Override
-    public ProjectResponse createProject(Long userId, ProjectRequest projectRequest) {
-        User owner = userRepository.findById(userId).orElseThrow(
-                ()-> new ResourceNotFoundException("User", userId.toString())
-        );
+    public ProjectResponse createProject(ProjectRequest projectRequest) {
+        Long userId = authUtil.getCurrentUserId();
+//        User owner = userRepository.findById(userId).orElseThrow(
+//                ()-> new ResourceNotFoundException("User", userId.toString())
+//        );
+        User owner = userRepository.getReferenceById(userId);
         Project project = Project.builder()
                 .name(projectRequest.name())
                 .isPublic(false).build();
@@ -72,21 +77,22 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponse updateProject(Long id, ProjectRequest projectRequest, Long userId) {
-        Project project = getAccessibleProjectById(id, userId);
+    public ProjectResponse updateProject(Long id, ProjectRequest projectRequest) {
+        Project project = getAccessibleProjectById(id);
         project.setName(projectRequest.name());
         projectRepository.save(project);
         return projectMapper.toProjectResponse(project);
     }
 
     @Override
-    public void softDelete(Long id, Long userId) {
-        Project project = getAccessibleProjectById(id, userId);
+    public void softDelete(Long id) {
+        Project project = getAccessibleProjectById(id);
         project.setDeletedAt(Instant.now());
         projectRepository.save(project);
     }
 
-    public Project getAccessibleProjectById(Long projectId, Long userId) {
+    public Project getAccessibleProjectById(Long projectId) {
+        Long userId = authUtil.getCurrentUserId();
         return projectRepository.findAllAccessibleProjectById(projectId,userId)
                 .orElseThrow(()->
                         new ResourceNotFoundException("Project", projectId.toString()));
