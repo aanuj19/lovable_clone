@@ -17,11 +17,13 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -36,6 +38,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     AuthUtil authUtil;
 
     @Override
+    @PreAuthorize("@security.canViewMembers(#projectId)")
     public List<MemberResponse> getProjectMembers(Long projectId) {
         Project project = getAccessibleProjectById(projectId);
         List<MemberResponse> memberResponseList = projectMemberRepository.findByIdProjectId(projectId)
@@ -46,6 +49,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
+    @PreAuthorize("@security.canManageMembers(#projectId)")
     public MemberResponse inviteMember(Long projectId, InviteMemberRequest request) {
         Project project = getAccessibleProjectById(projectId);
         User invitee = userRepository.findByUsername(request.username()).orElseThrow();
@@ -70,6 +74,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
+    @PreAuthorize("@security.canManageMembers(#projectId)")
     public MemberResponse updateMemberRole(Long projectId,UpdateMemberRoleRequest request, Long memberId) {
         Project project = getAccessibleProjectById(projectId);
         ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
@@ -80,6 +85,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
+    @PreAuthorize("@security.canManageMembers(#projectId)")
     public void removeProjectMember(Long projectId, Long memberId) {
         Project project = getAccessibleProjectById(projectId);
         ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
