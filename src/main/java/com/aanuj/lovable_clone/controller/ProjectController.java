@@ -23,7 +23,7 @@ public class ProjectController {
 
     @GetMapping
     public ResponseEntity<List<ProjectSummaryResponse>> getMyProjects() {
-        return ResponseEntity.ok(projectService.getUserProject(userId));
+        return ResponseEntity.ok(projectService.getUserProject());
     }
 
     @GetMapping("/{id}")
