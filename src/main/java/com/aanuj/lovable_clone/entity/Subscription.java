@@ -20,7 +20,6 @@ public class Subscription {
 
     SubscriptionStatus status;
     String stripSubscriptionId;
-    String stripCustomerId;
     Instant currentPeriodStart;
     Instant currentPeriodEnd;
     Boolean cancelAtPeriodEnd = false;

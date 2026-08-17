@@ -21,9 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -43,7 +41,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         Project project = getAccessibleProjectById(projectId);
         List<MemberResponse> memberResponseList = projectMemberRepository.findByIdProjectId(projectId)
                         .stream()
-                        .map(projectMemberMapper::toProjectMemberResponseFromMember).toList();;
+                        .map(projectMemberMapper::toProjectMemberResponseFromMember).toList();
 
         return memberResponseList;
     }

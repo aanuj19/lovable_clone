@@ -20,3 +20,10 @@ spring:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+stripe:
+  secret: ${STRIPE_SECRET_KEY}
+  webhook:
+    secret: ${STRIPE_WEBHOOK_SECRET}
+
+client.url: http://localhost:8080

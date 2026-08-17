@@ -27,7 +27,7 @@ public class WebSecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sessionMgmt -> sessionMgmt.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authReqs -> authReqs.requestMatchers("/api/**")
+                .authorizeHttpRequests(authReqs -> authReqs.requestMatchers("/api/**", "/webhooks/**")
                         .permitAll().anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
