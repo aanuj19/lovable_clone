@@ -5,7 +5,7 @@ public record PlanResponse(
         String name,
         Integer maxProjects,
         Integer maxTokenPerDay,
-        Boolean unlimitedAI,
+        Boolean unlimitedAi,
         String price
 ) {
 }
