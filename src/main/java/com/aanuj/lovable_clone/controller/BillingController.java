@@ -40,7 +40,7 @@ public class BillingController {
     }
 
     @GetMapping("/api/me/subscription")
-    public ResponseEntity<SubscriptionResponse> getMySubscripption(){
+    public ResponseEntity<SubscriptionResponse> getMySubscription(){
         return ResponseEntity.ok(subscriptionService.getCurrentSubscription());
     }
 

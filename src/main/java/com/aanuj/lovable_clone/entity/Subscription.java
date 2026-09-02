@@ -32,7 +32,7 @@ public class Subscription {
     @Enumerated(EnumType.STRING)
     SubscriptionStatus status;
 
-    String stripSubscriptionId; // can be renamed to gatewaySubscriptionId
+    String stripeSubscriptionId; // can be renamed to gatewaySubscriptionId
     Instant currentPeriodStart;
     Instant currentPeriodEnd;
     Boolean cancelAtPeriodEnd = false;

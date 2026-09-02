@@ -8,6 +8,7 @@ import com.aanuj.lovable_clone.entity.ProjectMember;
 import com.aanuj.lovable_clone.entity.ProjectMemberId;
 import com.aanuj.lovable_clone.entity.User;
 import com.aanuj.lovable_clone.enums.ProjectRole;
+import com.aanuj.lovable_clone.error.BadRequestException;
 import com.aanuj.lovable_clone.error.ResourceNotFoundException;
 import com.aanuj.lovable_clone.mapper.ProjectMapper;
 import com.aanuj.lovable_clone.repository.ProjectMemberRepository;
@@ -15,11 +16,11 @@ import com.aanuj.lovable_clone.repository.ProjectRepository;
 import com.aanuj.lovable_clone.repository.UserRepository;
 import com.aanuj.lovable_clone.security.AuthUtil;
 import com.aanuj.lovable_clone.service.ProjectService;
+import com.aanuj.lovable_clone.service.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.coyote.BadRequestException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,7 @@ public class ProjectServiceImpl implements ProjectService {
     UserRepository userRepository;
     ProjectMapper projectMapper;
     ProjectMemberRepository projectMemberRepository;
+    SubscriptionService subscriptionService;
     AuthUtil authUtil;
 
     @Override
@@ -54,6 +56,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse createProject(ProjectRequest projectRequest) {
+        if(!subscriptionService.canCreateNewProject()){
+            throw new BadRequestException("You can't create new project");
+        }
         Long userId = authUtil.getCurrentUserId();
 //        User owner = userRepository.findById(userId).orElseThrow(
 //                ()-> new ResourceNotFoundException("User", userId.toString())

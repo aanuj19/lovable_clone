@@ -6,6 +6,7 @@ import com.aanuj.lovable_clone.dto.subscription.PortalResponse;
 import com.aanuj.lovable_clone.entity.Plan;
 import com.aanuj.lovable_clone.entity.User;
 import com.aanuj.lovable_clone.enums.SubscriptionStatus;
+import com.aanuj.lovable_clone.error.BadRequestException;
 import com.aanuj.lovable_clone.error.ResourceNotFoundException;
 import com.aanuj.lovable_clone.repository.PlanRepository;
 import com.aanuj.lovable_clone.repository.UserRepository;
@@ -66,7 +67,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
             if(stripeCustomerId == null || stripeCustomerId.isEmpty()){
                 params.setCustomerEmail(user.getUsername());
             }else{
-                params.setCustomerEmail(stripeCustomerId);
+                params.setCustomer(stripeCustomerId); // stripe CustomerId
             }
             Session session = Session.create(params.build()); // making api call to stripe backend
             return new CheckoutResponse(session.getUrl());
@@ -77,7 +78,23 @@ public class StripePaymentProcessor implements PaymentProcessor {
 
     @Override
     public PortalResponse openCustomerPortal() {
-        return null;
+        Long userId = authUtil.getCurrentUserId();
+        User user = getUser(userId);
+        String stripeCustomerId = user.getStripeCustomerId();
+        if(stripeCustomerId == null || stripeCustomerId.isEmpty()){
+            throw new BadRequestException("Stripe Customer Id is empty for User with id : "+ userId);
+        }
+        try {
+            var portalSession = com.stripe.model.billingportal.Session.create(
+                    com.stripe.param.billingportal.SessionCreateParams.builder()
+                            .setCustomer(stripeCustomerId)
+                            .setReturnUrl(frontEndUrl)
+                            .build()
+            );
+            return new PortalResponse(portalSession.getUrl());
+        } catch (StripeException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -119,7 +136,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
             log.error("Subscription is null in handleCustomerSubscriptionDeleted");
             return;
         }
-        subscriptionService.cancelSubsription(subscription.getId());
+        subscriptionService.cancelSubscription(subscription.getId());
     }
 
     private void handleCustomerSubscriptionUpdated(Subscription subscription) {
@@ -152,7 +169,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
         String subscriptionId = session.getSubscription();
         String customerId = session.getCustomer();
         User user = getUser(userId);
-        if(user.getStripeCustomerId().isEmpty()){
+        if(user.getStripeCustomerId() == null ||  user.getStripeCustomerId().isEmpty()){
             user.setStripeCustomerId(customerId);
             userRepository.save(user);
         }
@@ -187,7 +204,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
         if(price == null || price.getId().isEmpty()){
             return null;
         }
-        return planRepository.findStripePriceId(price.getId())
+        return planRepository.findByStripePriceId(price.getId())
                 .map(Plan:: getId)
                 .orElse(null);
     }
